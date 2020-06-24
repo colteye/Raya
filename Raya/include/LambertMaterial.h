@@ -8,11 +8,11 @@ class LambertMaterial : public Material
 public:
 	void ComputeReflectance(Color& col, const glm::vec3& in, const glm::vec3& out, const Intersection& hit) 
 	{
-		Color diffuse;
+		Color diffuse_tmp;
 		float reflectance = glm::dot(glm::normalize(in), glm::normalize(out));
 
-		diffuse.Scale(diffuse_color, reflectance);
-		col.Multiply(diffuse);
+		diffuse_tmp.Scale(diffuse_color, reflectance);
+		col.Multiply(diffuse_tmp);
 	}
 
 private:

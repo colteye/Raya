@@ -3,6 +3,7 @@
 
 #include "Bitmap.h"
 #include "Scene.h"
+#include "RayTrace.h"
 #include "glm/glm.hpp"
 
 class Camera
@@ -13,6 +14,9 @@ public:
 	void SetResolution(int x, int y);
 	void LookAt(glm::vec3 pos, glm::vec3 target, glm::vec3 up);
 	void Render(Scene& s);
+
+	void RenderBatch(int x_start, int x_len, int y_start, int y_len, Scene& s);
+	
 
 	void SaveBitmap(std::string file_path);
 

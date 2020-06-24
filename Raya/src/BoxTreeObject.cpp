@@ -99,7 +99,7 @@ bool BoxTreeNode::Intersect_Children(const Ray& ray, Intersection& hit)
 	return success;
 }
 
-void BoxTreeNode::Construct_Children(std::vector<Triangle*>& tris, size_t max_depth)
+void BoxTreeNode::Construct(std::vector<Triangle*> tris)
 {
 	box_max = glm::vec3{ FLT_MIN, FLT_MIN, FLT_MIN };
 	box_min = glm::vec3{ FLT_MAX, FLT_MAX, FLT_MAX };
@@ -130,8 +130,9 @@ void BoxTreeNode::Construct_Children(std::vector<Triangle*>& tris, size_t max_de
 	else if (split_size == y_size) split_axis = 1;
 	else split_axis = 2;
 
-	if (depth >= max_depth - 1)
+	if (tris.size() <= max_tris)
 	{
+		//printf("LEAF!: %d\n", tris.size());
 		mesh_tris = tris;
 		return;
 	}
@@ -149,30 +150,35 @@ void BoxTreeNode::Construct_Children(std::vector<Triangle*>& tris, size_t max_de
 		else tris_2.push_back(t);
 	}
 
+	std::vector<Triangle*>().swap(tris);
+
 	// tris 1 corresponds to left
-	if (!tris_1.empty())
+	if (tris_1.empty())
 	{
-		left = new BoxTreeNode();
-		left->depth = depth + 1;
-		left->Construct_Children(tris_1, max_depth);
+		tris_1 = std::vector<Triangle*>(tris_2.end() - max_tris, tris_2.end());
+		tris_2.erase(tris_2.end() - max_tris, tris_2.end());
 	}
 
 	// tris 2 corresponds to right
-	if (!tris_2.empty())
+	if (tris_2.empty())
 	{
-		right = new BoxTreeNode();
-		right->depth = depth + 1;
-		right->Construct_Children(tris_2, max_depth);
+		tris_2 = std::vector<Triangle*>(tris_1.end() - max_tris, tris_1.end());
+		tris_1.erase(tris_1.end() - max_tris, tris_1.end());
 	}
+
+	left = new BoxTreeNode();
+	left->Construct(tris_1);
+
+	right = new BoxTreeNode();
+	right->Construct(tris_2);
 }
 
 ///////////////////////////////////////////////////////
 // BOX TREE STUFF /////////////////////////////////////
 ///////////////////////////////////////////////////////
 
-BoxTreeObject::BoxTreeObject(size_t depth)
+BoxTreeObject::BoxTreeObject()
 {
-	tree_depth = depth;
 	RootNode = new BoxTreeNode();
 }
 
@@ -190,7 +196,7 @@ void BoxTreeObject::Construct(MeshObject& obj)
 	for (int i = 0; i < tris.first; ++i)
 		tri_ptrs.push_back(&(*tris.second)[i]);
 
-	return RootNode->Construct_Children(tri_ptrs, tree_depth);
+	return RootNode->Construct(tri_ptrs);
 }
 
 bool BoxTreeObject::Intersect(const Ray& ray, Intersection& hit)

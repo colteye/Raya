@@ -14,15 +14,19 @@ public:
 
 	bool Intersect(const Ray &ray, Intersection &hit);
 	bool Intersect_Children(const Ray &ray, Intersection &hit);
-	void Construct_Children(std::vector<Triangle*>& tris, size_t max_depth);
+	//void Construct_Children(std::vector<Triangle*>& tris, size_t max_depth);
+
+	void Construct(std::vector<Triangle*> tris);
 
 	BoxTreeNode* left;
 	BoxTreeNode* right;
-	int depth = 0;
+	size_t depth = 0;
 	
 private:
 
 	glm::vec3 box_min, box_max;
+
+	const size_t max_tris = 10;
 	std::vector<Triangle*> mesh_tris;
 
 	int split_axis;
@@ -32,7 +36,7 @@ private:
 class BoxTreeObject : public Object 
 {
 public:
-	BoxTreeObject(size_t depth);
+	BoxTreeObject();
 	~BoxTreeObject();
 	void Construct(MeshObject& obj);
 	bool Intersect(const Ray& ray, Intersection& hit);

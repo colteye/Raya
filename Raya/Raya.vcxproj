@@ -145,6 +145,7 @@
     <ClInclude Include="include\Object.h" />
     <ClInclude Include="include\PointLight.h" />
     <ClInclude Include="include\Ray.h" />
+    <ClInclude Include="include\RayTrace.h" />
     <ClInclude Include="include\Scene.h" />
     <ClInclude Include="include\Triangle.h" />
     <ClInclude Include="include\Vertex.h" />
@@ -159,6 +160,7 @@
     <ClCompile Include="src\InstanceObject.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\MeshObject.cpp" />
+    <ClCompile Include="src\RayTrace.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

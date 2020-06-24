@@ -27,7 +27,7 @@ void project2() {
 	MeshObject dragon;
 	dragon.LoadPLY("Stanford_Dragon\\dragon_vrip_res2.ply", nullptr);
 	dragon.Smooth();
-	BoxTreeObject tree(10);
+	BoxTreeObject tree;
 	tree.Construct(dragon);
 	scn.AddObject(tree);
 
@@ -58,7 +58,7 @@ void project2() {
 	scn.AddLight(bluelgt);
 
 	//	Create camera
-	Camera cam(800, 400);
+	Camera cam(800, 600);
 	cam.LookAt(glm::vec3(-0.1f, 0.1f, 0.2f), glm::vec3(-0.05f, 0.12f, 0.0f), glm::vec3(0, 1.0f, 0));
 	cam.SetFOV(40.0f);
 
