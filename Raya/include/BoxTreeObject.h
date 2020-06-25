@@ -13,20 +13,22 @@ public:
 	~BoxTreeNode(); 
 
 	bool Intersect(const Ray &ray, Intersection &hit);
-	bool Intersect_Children(const Ray &ray, Intersection &hit);
-	//void Construct_Children(std::vector<Triangle*>& tris, size_t max_depth);
+	//bool Intersect_Children(const Ray &ray, Intersection &hit);
+	std::vector<BoxTreeNode*> Intersect_Children(const Ray& ray, Intersection& hit);
 
 	void Construct(std::vector<Triangle*> tris);
+	void Construct_Children(size_t max_tris);
+
 
 	BoxTreeNode* left;
 	BoxTreeNode* right;
-	size_t depth = 0;
+
+	std::vector<Triangle*>& GetTriangles() { return mesh_tris; }
+	bool IsLeaf() { return left == nullptr && right == nullptr; }
 	
 private:
 
 	glm::vec3 box_min, box_max;
-
-	const size_t max_tris = 10;
 	std::vector<Triangle*> mesh_tris;
 
 	int split_axis;
@@ -43,7 +45,7 @@ public:
 
 private:
 	BoxTreeNode* RootNode;
-	size_t tree_depth = 7;
+	const size_t max_tris_node = 40;
 };
 
 #endif // BOX_TREE_OBJECT_H

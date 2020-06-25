@@ -131,8 +131,6 @@ bool MeshObject::LoadPLY(std::string file_path, Material* mat)
 	bool vert_pos = false;
 	bool vert_norm = false;
 
-	printf("loading!\n");
-
 	std::string line = "";
 	while (line.find("end_header") == std::string::npos)
 	{

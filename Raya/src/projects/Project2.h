@@ -25,7 +25,8 @@ void project2() {
 
 	//	Create dragon
 	MeshObject dragon;
-	dragon.LoadPLY("Stanford_Dragon\\dragon_vrip_res2.ply", nullptr);
+	dragon.LoadPLY("Stanford_Dragon\\dragon_vrip.ply");
+	//dragon.LoadPLY("Stanford_Dragon\\dragon_vrip_res2.ply");
 	dragon.Smooth();
 	BoxTreeObject tree;
 	tree.Construct(dragon);

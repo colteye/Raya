@@ -46,11 +46,10 @@ bool BoxTreeNode::Intersect(const Ray& ray, Intersection& hit)
 	return true;
 }
 
-bool BoxTreeNode::Intersect_Children(const Ray& ray, Intersection& hit)
+/*bool BoxTreeNode::Intersect_Children(const Ray& ray, Intersection& hit)
 {
 	if (left == nullptr && right == nullptr)
 	{
-		//printf("LEAF VIBES!!!!\n");
 		bool success = false;
 		for (Triangle* t : mesh_tris)
 		{
@@ -92,11 +91,34 @@ bool BoxTreeNode::Intersect_Children(const Ray& ray, Intersection& hit)
 	for (int i = 0; i < node_hits.size(); ++i)
 		if (node_hits[i].first < hit.hit_distance)
 		{
-			//printf("DEPTH: %d\n", node_hit[i].second->depth);
 			if (node_hits[i].second->Intersect_Children(ray, hit)) success = true;
 		}
 		
 	return success;
+}*/
+
+std::vector<BoxTreeNode*> BoxTreeNode::Intersect_Children(const Ray& ray, Intersection& hit)
+{
+	std::vector<BoxTreeNode*> node_hits;
+	Intersection inter_l, inter_r;
+
+	inter_l.hit_distance = inter_r.hit_distance = hit.hit_distance;
+
+	if (left->Intersect(ray, inter_l))
+		node_hits.push_back(left);
+
+	if (right->Intersect(ray, inter_r))
+		node_hits.push_back(right);
+
+	if (node_hits.size() == 2)
+	{
+		if (inter_r.hit_distance < inter_l.hit_distance)
+		{
+			node_hits[0] = right;
+			node_hits[1] = left;
+		}
+	}
+	return node_hits;
 }
 
 void BoxTreeNode::Construct(std::vector<Triangle*> tris)
@@ -130,17 +152,15 @@ void BoxTreeNode::Construct(std::vector<Triangle*> tris)
 	else if (split_size == y_size) split_axis = 1;
 	else split_axis = 2;
 
-	if (tris.size() <= max_tris)
-	{
-		//printf("LEAF!: %d\n", tris.size());
-		mesh_tris = tris;
-		return;
-	}
+	mesh_tris = tris;
+}
 
+void BoxTreeNode::Construct_Children(size_t max_tris)
+{
 	std::vector<Triangle*> tris_1, tris_2;
 	float split_line = box_min[split_axis] + (split_size / 2);
 
-	for (Triangle* t : tris)
+	for (Triangle* t : mesh_tris)
 	{
 		glm::vec3 center = t->CalculateCenter();
 		if (center[split_axis] > split_line)
@@ -150,7 +170,8 @@ void BoxTreeNode::Construct(std::vector<Triangle*> tris)
 		else tris_2.push_back(t);
 	}
 
-	std::vector<Triangle*>().swap(tris);
+	// clear mesh tris from this node.
+	std::vector<Triangle*>().swap(mesh_tris);
 
 	// tris 1 corresponds to left
 	if (tris_1.empty())
@@ -196,14 +217,56 @@ void BoxTreeObject::Construct(MeshObject& obj)
 	for (int i = 0; i < tris.first; ++i)
 		tri_ptrs.push_back(&(*tris.second)[i]);
 
-	return RootNode->Construct(tri_ptrs);
+	RootNode->Construct(tri_ptrs);
+	std::queue<BoxTreeNode*> q;
+
+	q.push(RootNode);
+  
+	while (!q.empty())
+	{
+		BoxTreeNode* node = q.front();
+
+		size_t size = node->GetTriangles().size();
+		if (size > max_tris_node)
+		{
+			node->Construct_Children(max_tris_node);
+			q.push(node->left);
+			q.push(node->right);
+		}
+		q.pop();
+	}
 }
 
 bool BoxTreeObject::Intersect(const Ray& ray, Intersection& hit)
 {
-	if (RootNode == nullptr) return false;
 	if (!RootNode->Intersect(ray, hit)) return false;
-	hit.hit_distance = 2e10f;
+	hit.hit_distance = 1e10f;
 
-	return RootNode->Intersect_Children(ray, hit);
+	bool success = false;
+
+	std::vector<BoxTreeNode*> node_stack;
+	node_stack.push_back(RootNode);
+	int current_index = 1;
+
+	while (current_index > 0)
+	{
+		--current_index;
+		BoxTreeNode* node = node_stack[current_index];
+		node_stack.pop_back();
+
+		if (node->IsLeaf())
+		{
+			for (Triangle* t : node->GetTriangles())
+				if (t->Intersect(ray, hit)) success = true;
+			continue;
+		}
+
+		std::vector<BoxTreeNode*> node_hits = node->Intersect_Children(ray, hit);
+		for (int i = node_hits.size() - 1; i >= 0; --i)
+		{
+			node_stack.push_back(node_hits[i]);
+			current_index++;
+		}
+	}
+	return success;
 }

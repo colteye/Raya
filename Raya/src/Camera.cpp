@@ -45,7 +45,7 @@ void Camera::RenderBatch(int x_start, int x_len, int y_start, int y_len, Scene& 
 
 void Camera::Render(Scene & s)
 { 
-	size_t thread_count = 10;//std::thread::hardware_concurrency() / 2;
+	size_t thread_count = 10;// std::thread::hardware_concurrency();
 	size_t x_len = x_resolution / thread_count;
 
 	std::vector<std::thread> threads;
@@ -58,13 +58,8 @@ void Camera::Render(Scene & s)
 		x_start += x_len;
 	}
 
-	for (std::thread& t : threads)
-	{
-		t.join();
-	}
+	for (std::thread& t : threads) t.join();
 }
-
-
 
 void Camera::RenderPixel(int x, int y, Scene& s)
 {

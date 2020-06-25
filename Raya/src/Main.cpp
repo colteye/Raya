@@ -5,10 +5,7 @@
 #include <thread>
 
 int main(int argc, char **argv) {
-
-	std::cout << "thread count: " << std::thread::hardware_concurrency();
-
-	project1();
+	//project1();
 	project2();
 	return 0;
 }
